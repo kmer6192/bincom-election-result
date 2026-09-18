@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>LGA Total Results</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body>
+    <h1>Delta State Election Results</h1>
+
+    <nav>
+        <a href="/">Polling unit results</a>
+        |
+        <a href="/lga-results">LGA total results</a>
+    </nav>
+
+    <h2>Summed Polling Unit Results by LGA</h2>
+
+    <form method="GET" action="/lga-results">
+        <label for="lga_id">Select a local government:</label>
+
+        <select id="lga_id" name="lga_id" required>
+            <option value="">Choose an LGA</option>
+
+            {% for lga in lgas %}
+                <option
+                    value="{{ lga.lga_id }}"
+                    {% if selected_lga
+                        and selected_lga.lga_id == lga.lga_id %}
+                        selected
+                    {% endif %}
+                >
+                    {{ lga.lga_name }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Calculate total results</button>
+    </form>
+
+    {% if selected_lga %}
+        <h2>Total results for {{ selected_lga.lga_name }}</h2>
+
+        {% if results %}
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Party</th>
+                        <th>Total score</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for result in results %}
+                        <tr>
+                            <td>{{ result.party_abbreviation }}</td>
+                            <td>{{ result.total_score }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>
+                No polling unit result is available for this LGA.
+            </p>
+        {% endif %}
+    {% endif %}
+</body>
+</html>

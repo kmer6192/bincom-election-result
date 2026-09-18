@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Polling Unit Results</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body>
+    <h1>Delta State Election Results</h1>
+    <nav>
+    <a href="/">Polling unit results</a>
+    |
+    <a href="/lga-results">LGA total results</a>
+    |
+    <a href="/new-polling-unit">Enter new results</a>
+
+</nav>
+    <h2>Individual Polling Unit Result</h2>
+
+    <form method="GET" action="/">
+        <label for="polling_unit_id">
+            Select a polling unit:
+        </label>
+
+        <select
+            id="polling_unit_id"
+            name="polling_unit_id"
+            required
+        >
+            <option value="">Choose a polling unit</option>
+
+            {% for polling_unit in polling_units %}
+                <option
+                    value="{{ polling_unit.uniqueid }}"
+                    {% if selected_polling_unit
+                        and selected_polling_unit.uniqueid
+                        == polling_unit.uniqueid %}
+                        selected
+                    {% endif %}
+                >
+                    {{ polling_unit.polling_unit_number or "No number" }}
+                    -
+                    {{ polling_unit.polling_unit_name or "Unnamed polling unit" }}
+                </option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Display results</button>
+    </form>
+
+    {% if selected_polling_unit %}
+        <h2>
+            Results for
+            {{ selected_polling_unit.polling_unit_name
+                or "Unnamed polling unit" }}
+        </h2>
+
+        <p>
+            Polling unit number:
+            {{ selected_polling_unit.polling_unit_number or "Not available" }}
+        </p>
+
+        {% if results %}
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Party</th>
+                        <th>Score</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for result in results %}
+                        <tr>
+                            <td>{{ result.party_abbreviation }}</td>
+                            <td>{{ result.party_score }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p>No result is available for this polling unit.</p>
+        {% endif %}
+    {% endif %}
+</body>
+</html>

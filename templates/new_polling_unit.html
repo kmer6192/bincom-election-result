@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>New Polling Unit Results</title>
+
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='style.css') }}"
+    >
+</head>
+
+<body>
+    <h1>Delta State Election Results</h1>
+
+    <nav>
+        <a href="/">Polling unit results</a>
+        |
+        <a href="/lga-results">LGA total results</a>
+        |
+        <a href="/new-polling-unit">Enter new results</a>
+    </nav>
+
+    <h2>Enter Results for a New Polling Unit</h2>
+
+    {% if created_polling_unit_id %}
+        <p>
+            Polling unit {{ created_polling_unit_id }} and all party
+            results were saved successfully.
+        </p>
+
+        <p>
+            <a href="/?polling_unit_id={{ created_polling_unit_id }}">
+                Display the saved results
+            </a>
+        </p>
+    {% endif %}
+
+    {% if error_message %}
+        <p>{{ error_message }}</p>
+    {% endif %}
+
+    <form method="POST" action="/new-polling-unit">
+        <p>
+            <label for="lga_id">Local government:</label>
+
+            <select id="lga_id" name="lga_id" required>
+                <option value="">Choose an LGA</option>
+
+                {% for lga in lgas %}
+                    <option value="{{ lga.lga_id }}">
+                        {{ lga.lga_name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </p>
+
+        <p>
+            <label for="ward_uniqueid">Ward:</label>
+
+            <select
+                id="ward_uniqueid"
+                name="ward_uniqueid"
+                required
+                disabled
+            >
+                <option value="">Choose an LGA first</option>
+            </select>
+        </p>
+
+        <p>
+            <label for="polling_unit_number">
+                Polling unit number:
+            </label>
+
+            <input
+                id="polling_unit_number"
+                name="polling_unit_number"
+                type="text"
+                maxlength="50"
+                required
+            >
+        </p>
+
+        <p>
+            <label for="polling_unit_name">
+                Polling unit name:
+            </label>
+
+            <input
+                id="polling_unit_name"
+                name="polling_unit_name"
+                type="text"
+                maxlength="50"
+                required
+            >
+        </p>
+
+        <p>
+            <label for="polling_unit_description">
+                Description:
+            </label>
+
+            <textarea
+                id="polling_unit_description"
+                name="polling_unit_description"
+            ></textarea>
+        </p>
+
+        <p>
+            <label for="entered_by_user">Entered by:</label>
+
+            <input
+                id="entered_by_user"
+                name="entered_by_user"
+                type="text"
+                maxlength="50"
+                required
+            >
+        </p>
+
+        <h3>Party scores</h3>
+
+        {% for party in parties %}
+            <p>
+                <label for="score_{{ party.party_abbreviation }}">
+                    {{ party.partyname }}:
+                </label>
+
+                <input
+                    id="score_{{ party.party_abbreviation }}"
+                    name="score_{{ party.party_abbreviation }}"
+                    type="number"
+                    min="0"
+                    value="0"
+                    required
+                >
+            </p>
+        {% endfor %}
+
+        <button type="submit">
+            Save polling unit and results
+        </button>
+    </form>
+
+    <script>
+        const lgaSelect = document.getElementById("lga_id");
+        const wardSelect = document.getElementById("ward_uniqueid");
+
+        async function loadWards(lgaId) {
+            wardSelect.innerHTML =
+                '<option value="">Loading wards...</option>';
+
+            wardSelect.disabled = true;
+
+            if (!lgaId) {
+                wardSelect.innerHTML =
+                    '<option value="">Choose an LGA first</option>';
+
+                return;
+            }
+
+            try {
+                const response = await fetch(`/wards/${lgaId}`);
+                const wards = await response.json();
+
+                wardSelect.innerHTML =
+                    '<option value="">Choose a ward</option>';
+
+                for (const ward of wards) {
+                    const option = document.createElement("option");
+
+                    option.value = ward.uniqueid;
+                    option.textContent = ward.ward_name;
+
+                    wardSelect.appendChild(option);
+                }
+
+                wardSelect.disabled = false;
+            } catch (error) {
+                wardSelect.innerHTML =
+                    '<option value="">Unable to load wards</option>';
+            }
+        }
+
+        lgaSelect.addEventListener("change", function () {
+            loadWards(this.value);
+        });
+    </script>
+</body>
+</html>
