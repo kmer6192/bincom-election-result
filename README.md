@@ -41,7 +41,7 @@ The ward selection is dynamically updated according to the selected LGA.
 ## Project structure
 
 ```text
-python_interview2/
+bincom-election-result/
 ├── database/
 │   └── bincom_test.sql
 ├── static/
@@ -63,8 +63,8 @@ python_interview2/
 ### 1. Clone the repository
 
 ```bash
-git clone <repository-url>
-cd python_interview2
+git clone https://github.com/kmer6192/bincom-election-result.git
+cd bincom-election-result
 ```
 
 ### 2. Create the environment file
